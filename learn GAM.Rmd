@@ -84,3 +84,41 @@ mod_city3 <- gam(city.mpg ~ s(weight, by=drive) + s(length, by=drive) + s(price,
 plot(mod_city3, pages = 1)
 ```
 
+```{r}
+library(gamair)
+set.seed(0)
+data("mpg", package="gamair", verbose=FALSE)
+
+library(mgcv)
+# Fit the model
+mod <- gam(hw.mpg ~ s(length) + s(width) + s(height) + s(weight),
+           data = mpg, method = "REML")
+
+
+ ```
+
+```{r}
+# Check overall concurvity
+concurvity(mod)
+```
+```{r}
+library(tidyverse)
+```
+
+```{r}
+# Fit the model
+mod <- gam(hw.mpg ~ s(length) + s(width) + s(height) + s(weight),
+           data = mpg, method = "REML")
+
+# Check pairwise concurvity
+map(concurvity(mod, full = F), round, digits = 2)
+```
+```{r}
+concurvity(mod, full = F) %>% 
+  map(~round(., digits = 2))
+```
+
+```{r}
+tmp <- smoothCon(s(length), data = mpg)
+```
+
