@@ -6,3 +6,122 @@ output: github_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+```{r}
+library(mgcv)
+data(meuse, package="sp")
+
+# Inspect the data
+head(meuse)
+str(meuse)
+```
+```{r}
+mod2d <- gam(
+  data = meuse,
+  cadmium ~ s(x,y),
+  method = "REML"
+)
+```
+inspect the model
+```{r}
+summary(mod2d)
+```
+```{r}
+coef(mod2d)
+```
+```{r}
+mod2da <- gam(
+  data = meuse,
+  cadmium ~ s(x,y) + s(elev) +s(dist),
+  method = "REML"
+)
+```
+```{r}
+summary(mod2da)
+coef(mod2da)
+```
+```{r}
+plot(mod2d)
+```
+
+```{r}
+plot(mod2da)
+```
+```{r}
+plot(mod2d, scheme = 1)
+```
+
+```{r}
+plot(mod2d, scheme = 2)
+```
+```{r}
+vis.gam(mod2d, view = c("x","y"), plot.type = "persp")
+```
+
+```{r}
+library(gratia)
+```
+```{r}
+draw(mod2d)
+```
+```{r}
+plot(mod2da, pages = 1)
+```
+```{r}
+plot(mod2da, scheme = 2)
+```
+```{r}
+vis.gam(mod2d, view = c("x","y"), plot.type = "persp",se = 2)
+```
+```{r}
+# Rotate the same plot
+vis.gam(mod2d, view = c("x","y"), plot.type = "persp", se=2, theta = 135)
+```
+```{r}
+# Make plot with 5% extrapolation
+vis.gam(mod2d, view = c("x","y"), plot.type = "contour", too.far = 0.05)
+points(meuse)
+```
+```{r}
+vis.gam(mod2d, view = c("x","y"), plot.type = "contour", too.far = 0.1)
+points(meuse)
+```
+
+```{r}
+vis.gam(mod2d, view = c("x","y"), plot.type = "contour", too.far = 0.25)
+points(meuse)
+```
+
+```{r}
+mod_sep <- gam(data = meuse,
+               copper ~ s(dist, by = landuse) + landuse,
+               method = "REML"
+               )
+summary(mod_sep)
+```
+```{r}
+mod_fs <- gam(
+  data = meuse,
+  method = "REML",
+  copper ~ s(dist, landuse, bs = "fs")
+)
+
+summary(mod_fs)
+```
+```{r}
+plot(mod_sep, pages = 1)
+```
+
+```{r}
+plot(mod_fs, pages = 1)
+```
+
+```{r}
+vis.gam(mod_sep, view = c("dist", "landuse"), plot.type = "persp")
+```
+```{r}
+vis.gam(mod_fs, view = c("dist", "landuse"), plot.type = "persp")
+```
+```{r}
+?summary.gam
+```
+
