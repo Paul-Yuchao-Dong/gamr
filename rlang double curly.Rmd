@@ -1,0 +1,38 @@
+---
+title: "rlang double curly"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+mean_mpg <- mean(mtcars$mpg)
+
+# creating a new variable that shows that Miles/(US) gallon is greater than the mean or not
+
+mtcars <-
+mtcars %>%
+  mutate(mpg_cat = ifelse(mpg > mean_mpg, 1,0))
+```
+
+
+```{r}
+# Note: needs installation of rlang 0.4.0 or later
+get_pivot <- function(data, predictor,target, sum_var) {
+  result <-
+    data %>%
+    group_by(as.factor( {{ predictor }} )) %>%
+    summarise(sum=sum( {{ target }} ),total=n()) %>%
+    mutate({{sum_var}} := sum*100/total);
+
+  print(result)
+}
+
+```
+
+```{r}
+get_pivot(mtcars, cyl, mpg_cat, percentage)
+```
+

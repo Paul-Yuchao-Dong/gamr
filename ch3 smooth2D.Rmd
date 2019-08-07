@@ -124,4 +124,33 @@ vis.gam(mod_fs, view = c("dist", "landuse"), plot.type = "persp")
 ```{r}
 ?summary.gam
 ```
+```{r}
+# Fit the model
+tensor_mod <- gam(cadmium ~ te(x, y, elev), data = meuse, method = "REML")
+```
+
+
+```{r}
+# Summarize and plot
+summary(tensor_mod)
+plot(tensor_mod)
+```
+
+
+Convert the above model such that x and y interact on the same scale, the effect elev is a separate smooth, and the interaction of all three on different scales is a separate term.
+Summarize and plot the model.
+
+```{r}
+
+tensor_mod2 <- gam(cadmium ~ s(x, y) + s(elev) + ti(x, y, elev),
+                   data = meuse,
+                   method = "REML")
+
+```
+
+```{r}
+summary(tensor_mod2)
+
+plot(tensor_mod2, page = 1)
+```
 

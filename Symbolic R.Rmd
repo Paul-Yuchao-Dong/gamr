@@ -1,0 +1,115 @@
+---
+title: "Symbolic R"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(purrr)
+library(magrittr)
+library(rlang)
+```
+Define the function
+```{r}
+f <- z ~ (x - y) / (x + y)^2
+```
+```{r}
+str(f)
+```
+```{r}
+eval(f[[3]], list(x = 2, y = 0))
+```
+```{r}
+f3 <- f[[3]]
+```
+
+```{r}
+all.vars(f3)
+```
+```{r}
+map(all.vars(f3), function(v) D(f3,v))
+```
+
+```{r}
+map_chr(all.vars(f3), function(v) D(f3,v) %>% deparse)
+```
+```{r}
+math_str <- all.vars(f3) %>% 
+  map_chr(function(v) sprintf("(d%s * (%s))^2",v,D(f3,v) %>% deparse )) %>%  
+  paste(collapse = " + ") %>% 
+  sprintf("sqrt(%s)", .)
+```
+
+```{r}
+set.seed(0)
+data <- data.frame(
+    x  = runif(5), 
+    y  = runif(5), 
+    dx = runif(5)/10, 
+    dy = runif(5)/10
+)
+data
+```
+```{r}
+library(dplyr)
+```
+```{r}
+data["z"] <- eval(f3, data)
+```
+```{r}
+data %>% 
+  mutate(
+    z = eval(f3),
+    dz = eval(parse(text = math_str))
+  )
+```
+```{r}
+
+get_D <- function(f3){
+   
+  . <- all.vars(f3) 
+  . <- map_chr(., ~ sprintf("(d%s * (%s))^2",.x,D(f3,.x) %>% deparse ))
+  . <- paste(., collapse = " + ") 
+  math_str <- sprintf("sqrt(%s)", .)
+  
+  math_str
+}
+
+prop_err <- function(.formula, .data = data){
+  f3 <- .formula[[3]]
+  math_str <- get_D(f3)
+  
+  target <- all.vars(.formula[[2]])[[1]]
+  
+  error <- paste0("d", target)
+  
+  .data[target] <- eval(f3, .data)
+  .data[error] = eval(parse(text = math_str), data)
+  
+  .data
+}
+```
+
+```{r}
+prop_err(f <- z ~ (x - y) / (x + y)^2)
+```
+```{r}
+prop_err2 <- function(.formula, data = parent.frame()$data){
+  f3 <- .formula[[3]]
+  math_str <- get_D(f3)
+  
+  target <- all.vars(.formula[[2]])[[1]]
+  
+  error <- paste0("d", target)
+  
+  data[target] <- eval(f3, data)
+  data[error] = eval(parse(text = math_str), data)
+  
+  data
+}
+```
+
+```{r}
+prop_err2(f <- z ~ (x - y) / (x + y)^2)
+```
+
